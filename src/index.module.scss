@@ -1,0 +1,472 @@
+$font-default: monospace, Arial, sans-serif;
+// $link-color: #f39c12;
+$link-color: rgba(255, 100, 100, 1.0);
+$background-color: rgba(15, 15, 15, 1.0);
+
+body {
+  background-color: $background-color;
+  margin: 0;
+  overflow: hidden;
+}
+
+
+.dimming {
+  animation-name: dim;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+
+  @keyframes dim {
+    0%   { opacity: 0.3; }
+    50%  { opacity: 1.0; }
+    100% { opacity: 0.3; }
+  }
+}
+
+.no-btn-style {
+  background-color: Transparent;
+  background-repeat: no-repeat;
+  border: none;
+  outline: none;
+}
+
+.links {
+  position: absolute;
+  width: 100%;
+  font-family: $font-default;
+  font-size: 0.7rem;
+  text-align: center;
+  color: #ffffff;
+
+  a {
+    color: #eee;
+    text-align:center;
+    letter-spacing: 0.5rem;
+    text-decoration: none;
+
+    user-select: none;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  p {
+    color: #fff;
+    letter-spacing: 0.2rem;
+  }
+}
+
+.title {
+  @extend .links;
+  top: 1.5rem;
+  font-size: 1.2rem;
+  @media screen and (max-width: 1500px) {
+    top: 0.7rem;
+  }
+  // @media screen and (max-width: 1000px) {
+  //   font-size: 0.9rem;
+  //   top: 0rem;
+  // }
+
+  a {
+    letter-spacing: 0.3rem;
+    margin-right: 1rem;
+    padding-bottom: 5px;
+
+  }
+
+  .btn {
+    @extend .no-btn-style;
+
+    position: relative;
+    padding-left: 3px;
+    top: 5px;
+
+    img {
+      // padding-top: 1rem;
+      width: 1.2rem;
+      opacity: 0.7;
+      &:hover{
+        opacity: 1.0;
+      }
+
+      @media screen and (max-width: 1500px) {
+        width: 1.0rem;
+      }
+      // @media screen and (max-width: 1000px) {
+      //   width: 0.9rem;
+      // }
+    }
+  }
+
+  .tips {
+    @extend .dimming;
+    width: 40%;
+    margin: 0.8rem auto;
+
+    p {
+      margin: 0.1rem;
+      font-size: 0.9rem;
+      @media screen and (max-width: 1000px) {
+        font-size: 0.7rem;
+      }
+
+    }
+
+
+  }
+
+}
+
+
+
+
+// Base Colors
+$shade-10: #b33b3b !default;
+$shade-1: #d7dcdf !default;
+$shade-0: #fff !default;
+$teal: #1abc9c !default;
+
+$range-width: 100% !default;
+
+$range-handle-color: $shade-10 !default;
+$range-handle-color-hover: $teal !default;
+$range-handle-size: 10px !default;
+
+$range-track-color: $shade-1 !default;
+$range-track-height: 1.5px !default;
+
+$range-label-color: $shade-10 !default;
+$range-label-width: 60px !default;
+
+.control {
+  position: absolute;
+  display: block;
+
+  width: 100%;
+  height: 1rem;
+  bottom: 35px;
+
+  .slider {
+    // display: block;
+    display: flex;
+    justify-content: space-evenly;
+    width: 30rem;
+    margin: auto;
+
+    
+    button {
+      background: none;
+      color: inherit;
+      border: none;
+      padding: 0;
+      font: inherit;
+      cursor: pointer;
+      outline: inherit;
+
+      img {
+        opacity: 0.7;
+        transition: opacity 0.3s;
+        &:hover {
+          opacity: 1.0;
+        }
+      }
+    }
+
+    input[type='range'] {
+      -webkit-appearance: none;
+      width: 7rem;
+      height: $range-track-height;
+      border-radius: 5px;
+      outline: none;
+
+      display: inline;
+      margin: auto 0.5rem;
+
+      // Range Handle
+      &::-webkit-slider-thumb {
+        appearance: none;
+        width: $range-handle-size;
+        height: $range-handle-size;
+        border-radius: 40%;
+        background: $range-handle-color;
+        cursor: pointer;
+        transition: background .05s ease-in-out;
+
+        &:hover {
+          background: $range-handle-color-hover;
+        }
+      }
+    }
+  }
+}
+
+.foot {
+  @extend .links;
+  bottom: 12px;
+}
+
+.overlay {
+	/* Height & width depends on how you want to reveal the overlay (see JS below) */
+	height: 0%;
+	width: 100%;
+	position: fixed; /* Stay in place */
+	z-index: 1;
+	left: 0;
+	top: 0;
+	background-color: rgb(0, 0, 0); /* Black fallback color */
+	background-color: rgba(0, 0, 0, 0.85); /* Black w/opacity */
+	overflow-x: hidden; /* Disable horizontal scroll */
+	transition: 0.5s; /* 0.5 second transition effect to slide in or slide down the overlay (height or width, depending on reveal) */
+  -webkit-transition: 0.5s;
+
+  .intro {
+    max-width: 350px;
+    margin: 0rem auto;
+
+    p {
+      // strong {
+      //   font-size: 3.0rem;
+      // }
+      z-index: 3;
+      font-size: 1.0rem;
+      letter-spacing: 0.1rem;
+      line-height: 1.5rem;
+
+      @media screen and (max-width: 650px) {
+        line-height: 1rem;
+        font-size: 0.5rem;
+        margin: 0rem 2rem;
+      }
+      // text-align: center;
+      font-family: $font-default;
+      // margin: 10rem 7rem;
+      // margin: 0rem 7rem;
+      color: #ffffff;
+
+      a {
+        color: white;
+        font-style: italic;
+      }
+    }
+  }
+
+  .overlayBtn {
+    z-index: 2;
+
+    @extend .no-btn-style;
+    // position: fixed;
+    top: 0;
+    width: 100%;
+    height: 30%;
+  }
+}
+
+.interactive {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+
+  position: absolute;
+  // width: 100%;
+  // height: 100%;
+  z-index: -1;
+  max-width: 600px;
+  max-height: 600px;
+
+
+  top: 0;
+
+  @media screen and (max-height: 750px) {
+    top:10%;
+  }
+
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  margin: auto;
+
+  &.stop {
+    .musicBtn {
+      background: #444;
+
+      &.current {
+        background: #666;
+      }
+
+      &:hover {
+        background: #c0392b;
+      }
+    }
+  }
+
+  .musicBtn {
+    @extend .no-btn-style;
+    width: 120px;
+    height: 120px;
+    position: relative;
+
+    margin: 1rem;
+    border-radius: 10%;
+    background: #666;
+
+    &.current {
+      background: #aaa;
+    }
+
+    &:hover {
+      background: #e67e22;
+    }
+
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+    @media screen and (max-width: 370px) {
+      width: 70px;
+      height: 70px;
+      margin: 0.5rem;
+    }
+
+    .matrix {
+
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-around;    
+
+    }
+
+  }
+}
+
+.loadingText {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+
+  p {
+    font-size: 1rem;
+    font-family: $font-default;
+    color: #ffffff;
+  }
+}
+
+.canvas {
+  margin: auto;
+}
+
+
+// splash
+
+.splash {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  background-color: rgba(15, 15, 15, 1.0);
+  color: rgba(255,255,255, 0.8);
+  transition: opacity 500ms ease;
+  font-family: $font-default;
+  font-weight: medium;
+  text-align: center;
+
+  .wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-left: auto;
+    margin-right: auto;
+    width: 550px;
+    vertical-align: middle;
+
+
+    a {
+      color: $link-color;
+      text-decoration: none;
+    }
+
+    .about:hover {
+      border-bottom: 1px solid $link-color;
+      transition: border 300ms ease-in-out;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 0.5rem;
+    }
+    
+    p {
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+
+
+  .playButton {
+    cursor: pointer;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+    font-size: 22px;
+    display: block;
+    // box-sizing: border-box;
+    width: 205px;
+    height: 65px;
+    border: 0;
+    // border: 2px solid $link-color;
+    border-bottom: 2px solid $link-color;
+    border-top: 2px solid $link-color;
+    background-color: transparent;
+    // text-transform: uppercase;
+    color: $link-color;
+    text-align: center;
+    transition: background-color 300ms ease-in-out;
+    font-family: $font-default;
+  }
+  .playButton:hover {
+    color: white;
+    background-color: $link-color;
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;
+  }
+  .playButton:focus {
+    outline: none;
+  }
+
+  .description, .builtWith {
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+
+
+  .badgeWrapper {
+    left: 0;
+    bottom: 0;
+    margin: 20px;
+    position: absolute;
+    width: 80%;
+    max-width:200px;
+  }
+
+  .magentaLink {
+    margin-left: 0;
+    margin-right: 0;
+    color: #aaa;
+  }
+
+  .privacy {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    a {
+      color: #aaa;
+    }
+  }
+}
