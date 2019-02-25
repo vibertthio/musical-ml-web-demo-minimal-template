@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import styles from './index.module.scss';
 import info from './assets/info.png';
-import SamplesManager from './music/samples-manager';
-import Renderer from './render/renderer';
+import AudioManager from './drum-machine/audio-manager';
+import Renderer from './drum-machine/renderer';
 import playSvg from './assets/play.png';
 import pauseSvg from './assets/pause.png';
 import shufflePng from './assets/shuffle.png';
@@ -34,7 +34,7 @@ class App extends Component {
       },
     };
 
-    this.samplesManager = new SamplesManager((i) => {
+    this.audioManager = new AudioManager((i) => {
       this.handleLoadingSamples(i);
     }),
 
@@ -52,7 +52,6 @@ class App extends Component {
     // animation
     this.TWEEN = TWEEN;
     this.pauseChangeMatrix = false;
-    this.pauseChangeLatent = false;
   }
 
   componentDidMount() {
@@ -126,23 +125,12 @@ class App extends Component {
     const m = this.tempMatrix;
     this.matrix = m;
     this.renderer.changeMatrix(m);
-    this.samplesManager.changeMatrix(m);
-  }
-
-  changeLatent(latent) {
-    if (this.pauseChangeLatent) {
-      this.tempLatent = latent;
-    } else {
-      this.renderer.latent = latent;
-    }
-    this.pauseChangeLatent = false;
+    this.audioManager.changeMatrix(m);
   }
 
 
   // Server
-  // 1. GET
-  // 2. POST
-  getDrumVae(url, restart = true, callback = false) {
+  getDrumVae(url, restart = true) {
     fetch(url, {
       headers: {
         'content-type': 'application/json'
@@ -152,87 +140,33 @@ class App extends Component {
       .then(r => r.json())
       .then(d => {
         this.changeMatrix(d['result']);
-        this.changeLatent(d['latent']);
         if (restart) {
           this.start();
-        }
-        if (callback) {
-          this.onGetDrumVaeComplete();
         }
       })
       .catch(e => console.log(e));
   }
 
-  onGetDrumVaeComplete() {
-    const { waitingServer } = this.state;
-    if (waitingServer) {
-      this.renderer.latentGraph.showIndication = false;
-
-      if (this.diffAnimation) {
-        this.diffAnimation.start();
-      }
-
-      this.renderer.latentGraph.aniChange().start();
-      this.setState({
-        waitingServer: false,
-      });
-    }
-  }
-
   getDrumVaeRandom() {
-    this.renderer.latentGraph.showIndication = true;
     this.setState({
       waitingServer: true,
     });
     const url = this.serverUrl + 'rand';
-    this.getDrumVae(url, true, true);
+    this.getDrumVae(url, true);
   }
 
   getDrumVaeStatic() {
-    this.renderer.latentGraph.showIndication = true;
     this.setState({
       waitingServer: true,
     });
     const url = this.serverUrl + 'static';
-    this.getDrumVae(url, false, true);
-  }
-
-  postDrumVae(url, body, restart = false) {
-    fetch(url, {
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      headers: {
-        'accept': 'application/json',
-        'content-type': 'application/json'
-      },
-      body,
-    })
-      .then(r => r.json())
-      .then(d => {
-        this.changeMatrix(d['result']);
-        this.changeLatent(d['latent']);
-        if (restart) {
-          this.start();
-        }
-      })
-      .catch(e => console.log(e));
-  }
-
-  postDrumVaeAdjustLatent(latent, restart = false) {
-    const url = this.serverUrl + 'adjust-latent';
-    const body = JSON.stringify({ latent });
-    this.postDrumVae(url, body, false);
-  }
-
-  postDrumVaeAdjustData(data, restart = false) {
-    const url = this.serverUrl + 'adjust-data';
-    const body = JSON.stringify({ data });
-    this.postDrumVae(url, body, false);
+    this.getDrumVae(url, false);
   }
 
 
   // Utilities
   start() {
-    this.samplesManager.start();
+    this.audioManager.start();
     this.setState({
       playing: true,
     });
@@ -250,7 +184,7 @@ class App extends Component {
       loadingProgress: amt,
     });
     if (amt === 8) {
-      // const playing = this.samplesManager.trigger();
+      // const playing = this.audioManager.trigger();
       this.setState({
         // playing,
         loadingSamples: false,
@@ -281,64 +215,27 @@ class App extends Component {
     e.stopPropagation();
     const { slash, open } = this.state;
     if (!slash && !open) {
-      const [dragging, onGrid] = this.renderer.handleMouseDown(e);
+      const [onGrid] = this.renderer.handleMouseDown(e);
       if (onGrid) {
         const [i, j_reverse] = this.renderer.mouseOnIndex;
         const j = 8 - j_reverse;
         this.rawMatrix[i][j] = (this.rawMatrix[i][j] < this.state.gate ? 1 : 0);
         this.changeMatrix();
         this.diffAnimation.start();
-        this.samplesManager.triggerSoundEffect(0);
-        this.pauseChangeLatent = true;
-        this.renderer.encoderAniStart(() => {
-          // this.start();
-          if (!this.pauseChangeLatent) {
-            this.renderer.latent = this.tempLatent;
-          }
-          this.pauseChangeLatent = false;
-        });
-        this.postDrumVaeAdjustData(this.rawMatrix);
+        this.audioManager.triggerSoundEffect(0);
 
         if (this.state.instructionStage === 1) {
           this.nextInstruction();
         }
       }
-      if (dragging) {
-        this.setState({
-          dragging,
-        });
-      }
+
     }
   }
 
   handleMouseUp(e) {
     e.stopPropagation();
-    // const dragging = this.renderer.handleMouseDown(e);
     const { slash, open } = this.state;
-    const { selectedLatent, latent } = this.renderer;
     if (!slash && !open) {
-
-      if (this.state.dragging) {
-        this.pauseChangeMatrix = true;
-        this.samplesManager.triggerSoundEffect(0);
-
-        this.renderer.decoderAniStart(() => {
-          // this.start();
-
-          if (this.diffAnimation) {
-            this.diffAnimation.start();
-          }
-          this.pauseChangeMatrix = false;
-          this.updateMatrix();
-        });
-
-        this.postDrumVaeAdjustLatent(latent);
-
-        if (this.state.instructionStage === 0) {
-          this.nextInstruction();
-        }
-      }
-
       this.setState({
         dragging: false,
       });
@@ -350,7 +247,6 @@ class App extends Component {
     if (!this.state.dragging) {
       this.renderer.handleMouseMove(e);
     }
-    this.renderer.handleDraggingOnGraph(e);
   }
 
   // 2. Key
@@ -362,7 +258,7 @@ class App extends Component {
         // console.log(`key: ${e.keyCode}`);
         if (e.keyCode === 32) {
           // space
-          const playing = this.samplesManager.trigger();
+          const playing = this.audioManager.trigger();
           this.setState({
             playing,
           });
@@ -427,11 +323,11 @@ class App extends Component {
     const bpm = v;
     console.log(`bpm changed: ${bpm}`);
     this.setState({ bpm });
-    this.samplesManager.changeBpm(bpm);
+    this.audioManager.changeBpm(bpm);
   }
 
   handleClickPlayStopIcon() {
-    const playing = this.samplesManager.trigger();
+    const playing = this.audioManager.trigger();
     this.setState({
       playing,
     });
@@ -452,7 +348,7 @@ class App extends Component {
 
   // Render
   update() {
-    const b = this.samplesManager.beat;
+    const b = this.audioManager.beat;
     if (!this.state.loadingSamples) {
       this.renderer.draw(this.state.screen, b);
     }

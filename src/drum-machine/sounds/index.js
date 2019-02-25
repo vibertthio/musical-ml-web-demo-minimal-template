@@ -8,6 +8,12 @@ import d06 from './drum/6.wav';
 import d07 from './drum/7.wav';
 import d08 from './drum/8.wav';
 
+import beep from './effect/beep.wav';
+import correct from './effect/correct.wav';
+import end from './effect/end.wav';
+import wrong from './effect/wrong.wav';
+
+
 const drumUrls = [
   d00,
   d01,
@@ -20,4 +26,14 @@ const drumUrls = [
   d08,
 ];
 
-export default drumUrls;
+const effectUrls = [
+  beep,
+  correct,
+  end,
+  wrong,
+]
+
+export {
+  drumUrls,
+  effectUrls,
+};

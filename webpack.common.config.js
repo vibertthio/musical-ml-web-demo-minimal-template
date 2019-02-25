@@ -16,7 +16,6 @@ module.exports = {
 	resolve: {
 		extensions: ['.js', '.jsx'],
 		alias: {
-			libs: path.resolve(__dirname, 'src/libs'),
 			utils: path.resolve(__dirname, 'src/utils'),
 		},
 	},
@@ -50,9 +49,6 @@ module.exports = {
 				exclude: /node_modules/,
 				use: ExtractTextPlugin.extract({
 					fallback: 'style-loader',
-
-					// Could also be write as follow:
-					// use: 'css-loader?modules&importLoader=2&sourceMap&localIdentName=[name]__[local]___[hash:base64:5]!sass-loader'
 					use: [
 						{
 							loader: 'css-loader',
@@ -67,21 +63,6 @@ module.exports = {
 						'sass-loader',
 					],
 				}),
-			},
-			{
-				test: /\.(glsl|frag|vert)$/,
-				loader: 'glslify-import-loader',
-				exclude: /node_modules/,
-			},
-			{
-				test: /\.(glsl|frag|vert)$/,
-				loader: 'raw-loader',
-				exclude: /node_modules/,
-			},
-			{
-				test: /\.(glsl|frag|vert)$/,
-				loader: 'glslify-loader',
-				exclude: /node_modules/,
 			},
 			{
 				test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
