@@ -10,26 +10,8 @@ import shufflePng from './assets/shuffle.png';
 import sig from './assets/sig.png';
 import TWEEN from '@tweenjs/tween.js';
 
-
-const genres = [
-  'World',
-  'Country',
-  'Punk',
-  'Folk',
-  'Pop',
-  'NewAge',
-  'Rock',
-  'Metal',
-  'Latin',
-  'Blues',
-  'Electronic',
-  'RnB',
-  'Rap',
-  'Reggae',
-  'Jazz',
-];
-
 class App extends Component {
+  // Component (React) & initialization
   constructor(props) {
     super(props);
 
@@ -56,7 +38,7 @@ class App extends Component {
       this.handleLoadingSamples(i);
     }),
 
-    this.canvas = [];
+      this.canvas = [];
     this.matrix = [];
     this.rawMatrix = [];
     this.beat = 0;
@@ -98,8 +80,11 @@ class App extends Component {
     window.removeEventListener('resize', this.handleResize.bind(this, false));
   }
 
+
+  // Data control:
+  // 1. drum pattern(matrix)
+  // 2. latent vector
   changeMatrix(mat) {
-    // console.log('change matrix');
     if (mat) {
       this.rawMatrix = mat;
     }
@@ -116,7 +101,6 @@ class App extends Component {
         col.forEach((x, j) => {
           if (x !== this.matrix[i][j]) {
             this.diffMatrix.push({i, j, value: x});
-            // console.log(`i:${i}, j:${j}`);
           }
         });
       });
@@ -154,6 +138,10 @@ class App extends Component {
     this.pauseChangeLatent = false;
   }
 
+
+  // Server
+  // 1. GET
+  // 2. POST
   getDrumVae(url, restart = true, callback = false) {
     fetch(url, {
       headers: {
@@ -175,6 +163,22 @@ class App extends Component {
       .catch(e => console.log(e));
   }
 
+  onGetDrumVaeComplete() {
+    const { waitingServer } = this.state;
+    if (waitingServer) {
+      this.renderer.latentGraph.showIndication = false;
+
+      if (this.diffAnimation) {
+        this.diffAnimation.start();
+      }
+
+      this.renderer.latentGraph.aniChange().start();
+      this.setState({
+        waitingServer: false,
+      });
+    }
+  }
+
   getDrumVaeRandom() {
     this.renderer.latentGraph.showIndication = true;
     this.setState({
@@ -192,23 +196,6 @@ class App extends Component {
     const url = this.serverUrl + 'static';
     this.getDrumVae(url, false, true);
   }
-
-  onGetDrumVaeComplete() {
-    const { waitingServer } = this.state;
-    if (waitingServer) {
-      this.renderer.latentGraph.showIndication = false;
-
-      if (this.diffAnimation) {
-        this.diffAnimation.start();
-      }
-
-      this.renderer.latentGraph.aniChange().start();
-      this.setState({
-        waitingServer: false,
-      });
-    }
-  }
-
 
   postDrumVae(url, body, restart = false) {
     fetch(url, {
@@ -242,6 +229,8 @@ class App extends Component {
     this.postDrumVae(url, body, false);
   }
 
+
+  // Utilities
   start() {
     this.samplesManager.start();
     this.setState({
@@ -249,34 +238,45 @@ class App extends Component {
     });
   }
 
-  update() {
-    // tween
-    TWEEN.update();
-
-    const b = this.samplesManager.beat;
-    if (!this.state.loadingSamples) {
-      this.renderer.draw(this.state.screen, b);
-    }
-
-    requestAnimationFrame(() => { this.update() });
-  }
-
-  handleResize(value, e) {
+  nextInstruction() {
+    const { instructionStage } = this.state;
     this.setState({
-      screen: {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        ratio: window.devicePixelRatio || 1,
-      }
+      instructionStage: instructionStage + 1,
     });
   }
 
-  handleClick(e) {
-    e.stopPropagation();
-    // const index = this.renderer.handleClick(e);
-    // this.changeTableIndex(index);
+  handleLoadingSamples(amt) {
+    this.setState({
+      loadingProgress: amt,
+    });
+    if (amt === 8) {
+      // const playing = this.samplesManager.trigger();
+      this.setState({
+        // playing,
+        loadingSamples: false,
+      });
+    }
   }
 
+
+  // Menu control
+  openMenu() {
+    document.getElementById('menu').style.height = '100%';
+    this.setState({
+      open: true,
+    });
+  }
+
+  closeMenu() {
+    document.getElementById('menu').style.height = '0%';
+    this.setState({
+      open: false,
+    });
+  }
+
+
+  // Events handling
+  // 1. mouse
   handleMouseDown(e) {
     e.stopPropagation();
     const { slash, open } = this.state;
@@ -353,15 +353,7 @@ class App extends Component {
     this.renderer.handleDraggingOnGraph(e);
   }
 
-  handleClickMenu() {
-    const { open } = this.state;
-    if (open) {
-      this.closeMenu();
-    } else {
-      this.openMenu();
-    }
-  }
-
+  // 2. Key
   onKeyDown(e) {
     e.stopPropagation();
     const { slash, loadingSamples } = this.state;
@@ -396,44 +388,28 @@ class App extends Component {
     }
   }
 
-  changeTableIndex(currentTableIndex) {
-    this.samplesManager.changeTable(this.matrix[currentTableIndex]);
+  // 3. window resize
+  handleResize(value, e) {
     this.setState({
-      currentTableIndex,
+      screen: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        ratio: window.devicePixelRatio || 1,
+      }
     });
   }
 
-  openMenu() {
-    document.getElementById('menu').style.height = '100%';
-    this.setState({
-      open: true,
-    });
+  // 4. UIs
+  handleClick(e) {
+    e.stopPropagation();
   }
 
-  closeMenu() {
-    document.getElementById('menu').style.height = '0%';
-    this.setState({
-      open: false,
-    });
-  }
-
-  nextInstruction() {
-    const { instructionStage } = this.state;
-    this.setState({
-      instructionStage: instructionStage + 1,
-    });
-  }
-
-  handleLoadingSamples(amt) {
-    this.setState({
-      loadingProgress: amt,
-    });
-    if (amt === 8) {
-      // const playing = this.samplesManager.trigger();
-      this.setState({
-        // playing,
-        loadingSamples: false,
-      });
+  handleClickMenu() {
+    const { open } = this.state;
+    if (open) {
+      this.closeMenu();
+    } else {
+      this.openMenu();
     }
   }
 
@@ -454,16 +430,14 @@ class App extends Component {
     this.samplesManager.changeBpm(bpm);
   }
 
-  handleClickPlayButton() {
+  handleClickPlayStopIcon() {
     const playing = this.samplesManager.trigger();
     this.setState({
       playing,
     });
   }
 
-  onPlay() {
-    // console.log('press play!');
-
+  handleClickPlayButton() {
     const id =  'splash';
     const splash = document.getElementById(id);
     splash.style.opacity = 0.0;
@@ -475,14 +449,25 @@ class App extends Component {
     }, 500);
   }
 
+
+  // Render
+  update() {
+    const b = this.samplesManager.beat;
+    if (!this.state.loadingSamples) {
+      this.renderer.draw(this.state.screen, b);
+    }
+
+    TWEEN.update();
+    requestAnimationFrame(() => { this.update() });
+  }
+
   render() {
-    const { playing, currentTableIndex, loadingProgress, instructionStage } = this.state;
+    const { loadingProgress, instructionStage, gate, bpm } = this.state;
     const loadingText = (loadingProgress < 9) ? `loading..${loadingProgress}/9` : 'play';
-    const arr = Array.from(Array(9).keys());
-    const mat = Array.from(Array(9 * 16).keys());
-    const { gate, bpm } = this.state;
     return (
       <div>
+
+        {/* Landing Page */}
         <section className={styles.splash} id="splash">
           <div className={styles.wrapper}>
             <h1>Latent<br/>Inspector</h1>
@@ -498,7 +483,7 @@ class App extends Component {
               <button
                 className={styles.playButton}
                 id="splash-play-button"
-                onClick={() => this.onPlay()}
+                onClick={() => this.handleClickPlayButton()}
               >
                 {loadingText}
               </button>
@@ -523,6 +508,8 @@ class App extends Component {
             <a href="https://github.com/vibertthio/drum-vae-client" target="_blank">Terms</a>
           </div>
         </section>
+
+        {/* Title & Tips */}
         <div className={styles.title}>
           <a href="https://github.com/vibertthio/drum-vae-client" target="_blank" rel="noreferrer noopener">
             Latent Inspector
@@ -542,13 +529,8 @@ class App extends Component {
             {instructionStage === 2 ? <p>🎉Have fun!</p> : ''}
           </div>
         </div>
-        <div>
-          {this.state.loadingSamples && (
-            <div className={styles.loadingText}>
-              <p>{loadingText}</p>
-            </div>
-          )}
-        </div>
+
+        {/* Canvas */}
         <div>
           <canvas
             ref={ c => this.canvas = c }
@@ -557,12 +539,14 @@ class App extends Component {
             height={this.state.screen.height * this.state.screen.ratio}
           />
         </div>
+
+        {/* Controls */}
         <div className={styles.control}>
           <div className={styles.slider}>
             <div>
               <input type="range" min="1" max="100" value={gate * 100} onChange={this.handleChangeGateValue.bind(this)}/>
             </div>
-            <button onClick={() => this.handleClickPlayButton()} onKeyDown={e => e.preventDefault()}>
+            <button onClick={() => this.handleClickPlayStopIcon()} onKeyDown={e => e.preventDefault()}>
               {
                 !this.state.playing ?
                   (<img src={playSvg} width="30" height="30" alt="submit" />) :
@@ -577,6 +561,8 @@ class App extends Component {
             </div>
           </div>
         </div>
+
+        {/* Overlay */}
         <div id="menu" className={styles.overlay}>
           <button className={styles.overlayBtn} onClick={() => this.handleClickMenu()} />
           <div className={styles.intro}>
@@ -604,6 +590,7 @@ class App extends Component {
           </div>
           <button className={styles.overlayBtn} onClick={() => this.handleClickMenu()} />
         </div>
+
       </div>
     );
   }
