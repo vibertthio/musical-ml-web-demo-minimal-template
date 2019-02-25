@@ -87,6 +87,18 @@ export default class SamplesManager {
     Transport.bpm.value = b;
   }
 
+  changeVolume(v) {
+    const db = -5 * Math.log10(101 - v);
+    console.log(db);
+    for (let i = 0; i < 9; i += 1) {
+      if (v > 2) {
+        this.samples[i].volume.value = this.mixing[i] + db;
+      } else {
+        this.samples[i].volume.value = -200;
+      }
+    }
+  }
+
   triggerSamples(index) {
     this.currentIndex = index;
   }

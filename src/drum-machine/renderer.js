@@ -7,7 +7,6 @@ export default class Renderer {
 
     this.beat = 0;
     this.frameCount = 0;
-    this.dist = 0;
     this.gridWidth = 0;
     this.gridHeight = 0;
     this.gridXShift = 0;
@@ -16,12 +15,9 @@ export default class Renderer {
     this.diffAnimationRadiusRatio = 4;
 
     // Colors
+    this.whiteColor = 'rgba(255, 255, 255, 1.0)';
+    this.redColor = 'rgba(255, 100, 100, 1.0)';
     this.backgroundColor = 'rgba(15, 15, 15, 1.0)';
-    this.noteOnColor = 'rgba(255, 255, 255, 1.0)';
-    this.mouseOnColor = 'rgba(150, 150, 150, 1.0)';
-    this.noteOnCurrentColor = 'rgba(255, 100, 100, 1.0)';
-    this.redColor = this.noteOnCurrentColor;
-    this.whiteColor = this.noteOnColor;
 
     // Init Matrix
     this.initMatrix();
@@ -76,32 +72,23 @@ export default class Renderer {
 
   // Draw
   draw(src, b) {
+    // Update parameters
     const ctx = this.canvas.getContext('2d');
     this.frameCount += 1;
     this.beat = b;
     this.width = src.width;
     this.height = src.height;
-    const width = src.width;
-    const height = src.height;
-
-    const h = Math.min(width, height) * 0.18;
-    const w = width * 0.5;
-    this.dist = h * 1.2;
-    this.gridWidth = w;
-    this.gridHeight = h;
+    this.gridWidth = this.width * 0.5;
+    this.gridHeight = Math.min(this.width, this.height) * 0.18;
     this.gridXShift = 0;
     this.gridYShift = 0;
 
+    // Draw
     ctx.save();
-
-    // Draw background
     ctx.fillStyle = this.backgroundColor;
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Draw grid
-    ctx.translate(width * 0.5, height * 0.5);
-    this.drawGrid(ctx, w, h);
-
+    ctx.translate(this.width * 0.5, this.height * 0.5);
+    this.drawGrid(ctx, this.gridWidth, this.gridHeight);
     ctx.restore();
   }
 
@@ -141,7 +128,7 @@ export default class Renderer {
         const pos = Math.floor(t / 6) * 6;
         ctx.save();
         ctx.translate((pos + 0.5) * w_step, 9.5 * h_step);
-        ctx.fillStyle = this.noteOnCurrentColor;
+        ctx.fillStyle = this.redColor;
         ctx.beginPath();
         ctx.arc(0, 0, w_step * 0.5, 0, 2 * Math.PI, true);
         ctx.fill();
@@ -149,7 +136,7 @@ export default class Renderer {
       } else if (t % 6 === 0) {
         ctx.save();
         ctx.translate((t + 0.5) * w_step, 9.5 * h_step);
-        ctx.strokeStyle = this.noteOnCurrentColor;
+        ctx.strokeStyle = this.redColor;
         ctx.beginPath();
         ctx.arc(0, 0, w_step * 0.1, 0, 2 * Math.PI, true);
         ctx.stroke();
@@ -164,11 +151,11 @@ export default class Renderer {
         if (this.matrix[t][8 - d] > 0) {
 
           if (Math.abs(this.beat - t) < 2) {
-            ctx.fillStyle = this.noteOnCurrentColor;
+            ctx.fillStyle = this.redColor;
             recW = w_step * 1.5;
             recH = h_step * 0.8;
           } else {
-            ctx.fillStyle = this.noteOnColor;
+            ctx.fillStyle = this.whiteColor;
             if (t % 6 === 0) {
               recW = w_step * 1.0;
               recH = h_step * 0.5;

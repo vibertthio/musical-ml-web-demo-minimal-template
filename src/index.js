@@ -24,6 +24,7 @@ class App extends Component {
       loadingSamples: true,
       currentTableIndex: 4,
       gate: 0.2,
+      vol: 100,
       bpm: 120,
       instructionStage: 0,
       waitingServer: false,
@@ -309,12 +310,10 @@ class App extends Component {
     }
   }
 
-  handleChangeGateValue(e) {
-    const v = e.target.value;
-    const gate = v / 100;
-    // console.log(`gate changed: ${gate}`);
-    this.setState({ gate });
-    this.changeMatrix();
+  handleChangeVolume(e) {
+    const vol = e.target.value;
+    this.audioManager.changeVolume(vol)
+    this.setState({ vol })
   }
 
   handleChangeBpmValue(e) {
@@ -358,7 +357,7 @@ class App extends Component {
   }
 
   render() {
-    const { loadingProgress, instructionStage, gate, bpm } = this.state;
+    const { loadingProgress, instructionStage, gate, vol, bpm } = this.state;
     const loadingText = (loadingProgress < 9) ? `loading..${loadingProgress}/9` : 'play';
     return (
       <div>
@@ -366,14 +365,18 @@ class App extends Component {
         {/* Landing Page */}
         <section className={styles.splash} id="splash">
           <div className={styles.wrapper}>
-            <h1>Latent<br/>Inspector</h1>
-            <h2>
-              = 🥁 Drum + 🤖 VAE
-            </h2>
+            <h1>🎹🤖<br/>Web Music AI</h1>
+            <h3>
+              = A Minimal Template for Interactive Web-based Demonstrations of Musical Machine Learning
+            </h3>
             <div className="device-supported">
               <p className={styles.description}>
-                An interactive demo based on latent vector to generate drum pattern.
-                Modify the 32-dim latent vector to produce new drum patterns, and vice versa.
+                We use Tone.js to support real-time audio rendering and canvas API for visual rendering. It is designed to be easy to used by any practitioners to implement their own demonstrations.
+                Below are 4 implementations based on the template
+                : 1) <a className={styles.about} target="_blank" href="https://vibertthio.com/sornting/">Sornting</a>
+                , 2) <a className={styles.about} target="_blank" href="http://vibertthio.com/drum-vae-client/public/">DrumVAE</a>
+                , 3) <a className={styles.about} target="_blank" href="http://vibertthio.com/leadsheet-vae-client/">Song Mixer</a>
+                , and 4) <a className={styles.about} target="_blank" href="http://vibertthio.com/tuning-turing/">Tuning Turing</a>.
               </p>
 
               <button
@@ -385,9 +388,9 @@ class App extends Component {
               </button>
 
               <p className={styles.builtWith}>
-                Built with tone.js + Flask.
-                <br />
                 Learn more about <a className={styles.about} target="_blank" href="https://github.com/vibertthio/drum-vae-client">how it works.</a>
+                <br/>
+                <a className={styles.about} target="_blank" href="https://arxiv.org/abs/1902.03722">The paper</a> will be present in <a className={styles.about} target="_blank" href="https://milc2019.github.io/">MILC 2019.</a>
               </p>
 
               <p>Made by</p>
@@ -407,8 +410,8 @@ class App extends Component {
 
         {/* Title & Tips */}
         <div className={styles.title}>
-          <a href="https://github.com/vibertthio/drum-vae-client" target="_blank" rel="noreferrer noopener">
-            Latent Inspector
+          <a href="https://github.com/vibertthio/musical-ml-web-demo-minimal-template" target="_blank" rel="noreferrer noopener">
+            🎹 Web Music AI 🤖
           </a>
           <button
             className={styles.btn}
@@ -419,10 +422,13 @@ class App extends Component {
           </button>
 
           <div className={styles.tips} id="tips">
-            {instructionStage < 2 ? <p>🙋‍♀️Tips</p> : ''}
-            {instructionStage === 0 ? (<p>👇Drag the <font color="#ff6464">red dots</font> in the latent vector</p>) : ''}
-            {instructionStage === 1 ? (<p>👇Click on the <font color="#2ecc71">drum patterns</font> to test the encoder</p>) : ''}
-            {instructionStage === 2 ? <p>🎉Have fun!</p> : ''}
+            <p>🙋‍♀️Examples</p>
+            <p>1) <a className={styles.about} target="_blank" href="https://vibertthio.com/sornting/">Sornting</a></p>
+            <p>2) <a className={styles.about} target="_blank" href="http://vibertthio.com/drum-vae-client/public/">DrumVAE</a></p>
+            <p>3) <a className={styles.about} target="_blank" href="http://vibertthio.com/leadsheet-vae-client/">Song Mixer</a></p>
+            <p>4) <a className={styles.about} target="_blank" href="http://vibertthio.com/tuning-turing/">Tuning Turing</a></p>
+
+
           </div>
         </div>
 
@@ -440,7 +446,7 @@ class App extends Component {
         <div className={styles.control}>
           <div className={styles.slider}>
             <div>
-              <input type="range" min="1" max="100" value={gate * 100} onChange={this.handleChangeGateValue.bind(this)}/>
+              <input type="range" min="1" max="100" value={vol} onChange={this.handleChangeVolume.bind(this)}/>
             </div>
             <button onClick={() => this.handleClickPlayStopIcon()} onKeyDown={e => e.preventDefault()}>
               {
@@ -463,13 +469,13 @@ class App extends Component {
           <button className={styles.overlayBtn} onClick={() => this.handleClickMenu()} />
           <div className={styles.intro}>
             <p>
-              <strong>$ Latent Inspector $</strong>
-              <br />An interactive demo based on latent vector to generate drum pattern. Made by{' '}
+              <strong>$ 🎹 Web Music AI 🤖 $</strong>
+              <br />A Minimal Template for Interactive Web-based Demonstrations of Musical Machine Learning. Made by{' '}
               <a href="https://vibertthio.com/portfolio/" target="_blank" rel="noreferrer noopener">
                 Vibert Thio
               </a>.{' Source code is on '}
               <a
-                href="https://github.com/vibertthio/drum-vae-client"
+                href="https://github.com/vibertthio/musical-ml-web-demo-minimal-template"
                 target="_blank"
                 rel="noreferrer noopener"
               >
@@ -477,11 +483,7 @@ class App extends Component {
               </a>
             </p>
             <p>
-              <strong>$ How to use $</strong>
-              <br /> [space]: play/pause
-              <br /> [r]: random sample
-              <br /> [drag]: rag the circular diagram to change the latent vector
-              <br /> [click]: click to change the drum pattern
+              We use Tone.js to support real-time audio rendering and canvas API for visual rendering. Moreover, it will be presented in the workshop session of IUI 2019.
             </p>
           </div>
           <button className={styles.overlayBtn} onClick={() => this.handleClickMenu()} />
